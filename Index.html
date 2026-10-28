@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#123b35"><title>MitoBrew · Agua cervecera</title>
+<style>
+:root{--bg:#f3f6f1;--card:#fff;--ink:#172c28;--muted:#687a73;--green:#123b35;--lime:#c9ef79;--line:#dce5dd;--orange:#f5a65b;--red:#a43d35}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:linear-gradient(135deg,#123b35,#246b59);color:#fff;padding:25px 18px 22px;border-radius:0 0 25px 25px}
+.brand{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#c9ef79;font-weight:800}h1{font-size:27px;line-height:1.1;margin:8px 0}header p{margin:8px 0 0;color:#d9e9e0;max-width:550px}
+main{max-width:850px;margin:auto;padding:16px 13px 50px}.tabs{display:flex;gap:8px;overflow:auto;margin:0 0 14px}.tab{border:1px solid var(--line);background:#fff;color:var(--green);border-radius:99px;padding:10px 14px;font-weight:750;white-space:nowrap}.tab.active{background:var(--green);color:white}
+.panel{display:none}.panel.active{display:block}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:13px;box-shadow:0 3px 14px #153b3510}
+h2{font-size:18px;margin:0 0 4px}h3{font-size:15px;margin:16px 0 8px}.sub{color:var(--muted);font-size:13px;margin:0 0 13px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+label{display:block;font-size:12px;font-weight:750;color:#52655e;margin:0 0 5px}
+input,select{width:100%;min-width:0;padding:11px 10px;border:1px solid #d4dfd6;border-radius:10px;background:#fbfdfb;color:var(--ink);font:inherit}
+input:focus,select:focus{outline:2px solid #9dcf9d;border-color:#498b6c}
+.unit{font-size:11px;color:var(--muted);font-weight:500}
+.btn{border:0;background:var(--green);color:white;border-radius:11px;padding:12px 14px;font-weight:800;font:inherit;cursor:pointer}.btn.secondary{background:#e8f0e8;color:var(--green)}.btn.warn{background:#fff0e2;color:#784219}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.metric{background:#eff6ed;border-radius:12px;padding:11px}.metric b{display:block;font-size:20px;color:var(--green)}.metric span{font-size:11px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:right;padding:9px 5px;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left}th{color:var(--muted);font-size:11px}
+.pill{display:inline-block;border-radius:99px;background:#edf4e9;padding:4px 8px;font-size:11px;font-weight:800;color:#2a6549}.note{background:#fff7e9;border:1px solid #f0d8af;border-radius:12px;padding:12px;font-size:12px;color:#684d2a}.ok{color:#26724d}.bad{color:var(--red)}.grain{display:grid;grid-template-columns:1.4fr .7fr .7fr auto;gap:6px;align-items:end;margin:8px 0}.grain button{padding:10px;border-radius:9px;border:0;background:#f9e8e4;color:#9d352d;font-weight:800}.small{font-size:12px;color:var(--muted)}.bigresult{font-size:28px;font-weight:850;letter-spacing:-1px}.footer{text-align:center;color:var(--muted);font-size:11px;padding:12px}
+@media(min-width:650px){main{padding:22px}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.grain{grid-template-columns:2fr 1fr 1fr auto}}
+</style>
+</head>
+<body>
+<header><div class="brand">MITOBREW · HERRAMIENTAS DE ELABORACIÓN</div><h1>Agua cervecera</h1><p>Ajusta tu perfil mineral, calcula las sales y registra el pH de maceración. Hecha para usar cómodamente desde el móvil.</p></header>
+<main>
+<div class="tabs">
+<button class="tab active" data-tab="agua">💧 Perfil de agua</button><button class="tab" data-tab="malta">🌾 Maltas y pH</button><button class="tab" data-tab="guardado">📒 Mis perfiles</button>
+</div>
+<section class="panel active" id="agua">
+<div class="card">
+<h2>1 · Volumen de agua</h2><p class="sub">Indica los litros a los que quieres aplicar las sales. Puedes calcular macerado y lavado por separado.</p>
+<div class="grid"><div><label>Agua a tratar (L)</label><input id="liters" type="number" min="0.1" step=".1" value="25"></div><div><label>Nombre del perfil</label><input id="profileName" value="Mi elaboración"></div></div>
+</div>
+<div class="card"><h2>2 · Perfil inicial</h2><p class="sub">Valores en mg/L (ppm). Usa un análisis del agua o los datos de la etiqueta.</p>
+<div class="grid3" id="sourceFields"></div></div>
+<div class="card"><h2>3 · Perfil objetivo</h2><p class="sub">Introduce el perfil deseado para esta cerveza. La app propone sales sin valores negativos.</p>
+<div class="grid3" id="targetFields"></div>
+<div class="actions"><button class="btn" id="calc">Calcular sales</button><button class="btn secondary" id="copySource">Copiar inicial → objetivo</button></div>
+</div>
+<div class="card">
+<h2>4 · Resultado del ajuste</h2><p class="sub">Aporte estimado de las sales seleccionadas y perfil final calculado.</p>
+<div class="grid3"><div class="metric"><span>Calcio final</span><b id="mCa">—</b><span>mg/L</span></div><div class="metric"><span>Cloruro final</span><b id="mCl">—</b><span>mg/L</span></div><div class="metric"><span>Sulfato final</span><b id="mSO4">—</b><span>mg/L</span></div></div>
+<div style="overflow-x:auto;margin-top:13px"><table><thead><tr><th>Ion</th><th>Inicial</th><th>Objetivo</th><th>Calculado</th><th>Dif.</th></tr></thead><tbody id="results"></tbody></table></div>
+<h3>Sales que debes pesar</h3><div id="saltResults" class="small">Pulsa «Calcular sales» para obtener la propuesta.</div>
+<div class="actions"><button class="btn secondary" id="save">Guardar perfil</button><button class="btn secondary" id="export">Exportar resumen .txt</button></div>
+</div>
+<div class="card"><h2>5 · Ácido fosfórico</h2><p class="sub">Estimación para reducir alcalinidad (no predice por sí sola el pH de maceración).</p>
+<div class="grid"><div><label>Alcalinidad inicial <span class="unit">(mg/L como CaCO₃)</span></label><input id="alkStart" type="number" value="120" min="0"></div><div><label>Alcalinidad deseada <span class="unit">(mg/L como CaCO₃)</span></label><input id="alkTarget" type="number" value="40" min="0"></div><div><label>Concentración de ácido</label><select id="acidConc"><option value="75">75 %</option><option value="85">85 %</option><option value="10">10 %</option></select></div><div><label>Volumen de agua (L)</label><input id="acidLiters" type="number" value="25" min=".1" step=".1"></div></div>
+<div class="actions"><button class="btn" id="acidCalc">Estimar ácido</button></div><p id="acidResult" class="small">Introduce tus valores y calcula.</p>
+<div class="note">El cálculo de ácido es una aproximación química para neutralizar alcalinidad, no una garantía de pH. Añade poco a poco, mezcla y mide con un pH-metro calibrado. Para afinar el pH real influyen las maltas, el agua, la temperatura y la concentración/densidad exactas del ácido.</div>
+</div>
+</section>
+<section class="panel" id="malta">
+<div class="card"><h2>🌾 Maltas de la receta</h2><p class="sub">Añade cada malta y su peso. La lista ayuda a interpretar el pH, pero el color por sí solo no permite predecirlo con precisión.</p>
+<div id="grains"></div><div class="actions"><button class="btn secondary" id="addGrain">+ Añadir malta</button></div>
+<div class="grid" style="margin-top:13px"><div><label>Litros de macerado</label><input id="mashLiters" type="number" value="20" min=".1" step=".1"></div><div><label>Temperatura de medición del pH (°C)</label><input id="phTemp" type="number" value="20"></div><div><label>pH objetivo de macerado</label><input id="phTarget" type="number" value="5.4" min="4" max="6.5" step=".05"></div><div><label>pH medido (opcional)</label><input id="phMeasured" type="number" placeholder="p. ej. 5.62" min="3" max="8" step=".01"></div></div>
+<div class="grid3" style="margin-top:12px"><div class="metric"><span>Maltas totales</span><b id="grainTotal">0.00</b><span>kg</span></div><div class="metric"><span>Agua por kg</span><b id="ratio">—</b><span>L/kg</span></div><div class="metric"><span>pH medido</span><b id="phDelta">—</b><span id="phHint">Añade medición</span></div></div>
+<div class="note" style="margin-top:13px"><b>Cómo ajustar el pH:</b> mide una muestra enfriada a unos 20–25 °C tras 10–15 minutos de macerado. Si está alto, añade ácido fosfórico en pequeñas dosis, mezcla, espera y vuelve a medir. Si está bajo, no añadas más ácido; bicarbonato puede subirlo, pero también aumenta sodio y alcalinidad. No calculamos un pH “exacto” solo a partir de los nombres/pesos de malta porque sería engañoso.</div>
+</div>
+</section>
+<section class="panel" id="guardado">
+<div class="card"><h2>📒 Perfiles guardados</h2><p class="sub">Se guardan en este navegador/dispositivo. No se envían a ningún servidor.</p><div id="savedList" class="small">Todavía no has guardado perfiles.</div><div class="actions"><button class="btn secondary" id="downloadBackup">Exportar copia JSON</button><button class="btn warn" id="clearSaved">Borrar perfiles guardados</button></div></div>
+</section>
+<div class="footer">MitoBrew · Calculadora orientativa para cervecería casera · Revisa siempre las unidades y mide el pH real.</div>
+</main>
+<script>
+const ions=[["Ca","Calcio"],["Mg","Magnesio"],["Na","Sodio"],["Cl","Cloruro"],["SO4","Sulfato"],["HCO3","Bicarbonato"]];
+const salts=[
+{name:"Sal Epson (MgSO₄·7H₂O)",key:"epsom",ions:{Ca:0,Mg:98.6,Na:0,Cl:0,SO4:389.6,HCO3:0}},
+{name:"Gypsum / yeso (CaSO₄·2H₂O)",key:"gypsum",ions:{Ca:232.8,Mg:0,Na:0,Cl:0,SO4:557.6,HCO3:0}},
+{name:"Cloruro cálcico (CaCl₂·2H₂O)",key:"cacl2",ions:{Ca:272.6,Mg:0,Na:0,Cl:482.3,SO4:0,HCO3:0}},
+{name:"Bicarbonato sódico (NaHCO₃)",key:"nahco3",ions:{Ca:0,Mg:0,Na:273.7,Cl:0,SO4:0,HCO3:726.2}}
+];
+const $=id=>document.getElementById(id);
+const num=id=>Math.max(0,Number($(id).value)||0);
+function buildIonFields(id,defaults){$(id).innerHTML=ions.map(([k,n])=>`<div><label>${n} <span class="unit">(mg/L)</span></label><input type="number" min="0" step="1" id="${id}_${k}" value="${defaults[k]}" /></div>`).join("")}
+buildIonFields("sourceFields",{Ca:30,Mg:4,Na:11,Cl:5,SO4:8,HCO3:122});
+buildIonFields("targetFields",{Ca:50,Mg:10,Na:10,Cl:70,SO4:50,HCO3:40});
+function vals(prefix){return Object.fromEntries(ions.map(([k])=>[k,Math.max(0,Number($(`${prefix}_${k}`).value)||0)]))}
+$("copySource").onclick=()=>{let s=vals("sourceFields");ions.forEach(([k])=>$(`targetFields_${k}`).value=s[k]);calculate()};
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab,.panel").forEach(x=>x.classList.remove("active"));b.classList.add("active");$(""+b.dataset.tab).classList.add("active");if(b.dataset.tab==="guardado")renderSaved()});
+let last={};
+function solveLinear(A,b){let n=b.length,M=A.map((r,i)=>[...r,b[i]]);for(let i=0;i<n;i++){let p=i;for(let j=i+1;j<n;j++)if(Math.abs(M[j][i])>Math.abs(M[p][i]))p=j;if(Math.abs(M[p][i])<1e-10)continue;[M[i],M[p]]=[M[p],M[i]];let d=M[i][i];for(let k=i;k<=n;k++)M[i][k]/=d;for(let j=0;j<n;j++)if(j!==i){let f=M[j][i];for(let k=i;k<=n;k++)M[j][k]-=f*M[i][k]}}return M.map(r=>r[n])}
+function calculate(){
+ const L=Math.max(.1,num("liters")),s=vals("sourceFields"),t=vals("targetFields");
+ // Greedy coordinate descent least squares; each salt mass is constrained >= 0.
+ const keys=["Ca","Mg","Na","Cl","SO4","HCO3"],weights={Ca:1.2,Mg:1,Na:.45,Cl:1,SO4:.9,HCO3:.75};
+ let x=[0,0,0,0],base={...s};
+ for(let pass=0;pass<100;pass++){
+   let changed=false;
+   for(let j=0;j<salts.length;j++){
+     let den=0,numr=0;
+     for(let k of keys){let a=salts[j].ions[k]/L*weights[k];den+=a*a;numr+=a*(t[k]-base[k])*weights[k]}
+     let nx=Math.max(0,x[j]+(den?numr/den:0));let delta=nx-x[j];
+     if(Math.abs(delta)>1e-7){x[j]=nx;for(let k of keys)base[k]+=salts[j].ions[k]/L*delta;changed=true}
+   }if(!changed)break;
+ }
+ last={L,s,t,x,base,name:$("profileName").value};
+ $("results").innerHTML=ions.map(([k,n])=>{let d=base[k]-t[k];return `<tr><td>${n}</td><td>${s[k].toFixed(1)}</td><td>${t[k].toFixed(1)}</td><td>${base[k].toFixed(1)}</td><td class="${Math.abs(d)>10?'bad':'ok'}">${d>0?"+":""}${d.toFixed(1)}</td></tr>`}).join("");
+ $("mCa").textContent=base.Ca.toFixed(0);$("mCl").textContent=base.Cl.toFixed(0);$("mSO4").textContent=base.SO4.toFixed(0);
+ $("saltResults").innerHTML=salts.map((salt,i)=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)"><span>${salt.name}</span><b>${(x[i]).toFixed(2)} g</b></div>`).join("")+`<p class="small">Masa total propuesta para ${L.toFixed(1)} L. Es una aproximación matemática: revisa los iones finales y prioriza evitar excesos. Si el resultado no encaja, ajusta manualmente o cambia el objetivo.</p>`;
+}
+$("calc").onclick=calculate;
+document.querySelectorAll("input").forEach(el=>el.addEventListener("change",()=>{if(el.id.startsWith("sourceFields_")||el.id.startsWith("targetFields_")||el.id==="liters")calculate()}));
+$("acidCalc").onclick=()=>{
+ let a=num("alkStart"),b=Math.min(a,num("alkTarget")),L=Math.max(.1,num("acidLiters")),c=num("acidConc");
+ // Approximate phosphoric acid solution: density approximations, neutralization to bicarbonate endpoint.
+ let density=c===75?1.58:c===85?1.685:1.05, fraction=c/100, molPerMl=density*fraction/97.994;
+ let meq=(a-b)*L/50;let ml=meq/(molPerMl*1000);
+ $("acidResult").innerHTML=`Estimación inicial: <span class="bigresult">${ml.toFixed(2)} ml</span> de ácido fosfórico al ${c} % para ${L.toFixed(1)} L, reduciendo alcalinidad de ${a} a ${b} mg/L como CaCO₃.<br><br><b>Empieza con un 50–70 % de esta cantidad</b>, mezcla y mide. La respuesta real depende del agua y del punto final de neutralización; no uses este valor como sustituto de la medición.`;
+};
+const grainDefaults=[{name:"Malta Pale / Pilsner",kg:4.5,type:"base"},{name:"Caramelo",kg:.3,type:"crystal"}];
+let grainRows=[];
+function addGrain(g={name:"",kg:0,type:"base"}){grainRows.push({...g,id:Date.now()+Math.random()});renderGrains()}
+function renderGrains(){$("grains").innerHTML=grainRows.map((g,i)=>`<div class="grain"><div><label>Malta</label><input data-i="${i}" data-k="name" value="${g.name.replace(/"/g,"&quot;")}" placeholder="Nombre de malta"></div><div><label>Peso (kg)</label><input data-i="${i}" data-k="kg" type="number" min="0" step=".05" value="${g.kg}"></div><div><label>Tipo</label><select data-i="${i}" data-k="type"><option value="base" ${g.type==="base"?"selected":""}>Base</option><option value="crystal" ${g.type==="crystal"?"selected":""}>Caramelo</option><option value="roast" ${g.type==="roast"?"selected":""}>Tostada</option><option value="acid" ${g.type==="acid"?"selected":""}>Acidulada</option><option value="wheat" ${g.type==="wheat"?"selected":""}>Trigo/avena</option></select></div><button data-remove="${i}" aria-label="Eliminar malta">×</button></div>`).join("");
+ $("grains").querySelectorAll("[data-i]").forEach(el=>el.onchange=()=>{grainRows[+el.dataset.i][el.dataset.k]=el.dataset.k==="kg"?Math.max(0,Number(el.value)||0):el.value;updateGrains()});
+ $("grains").querySelectorAll("[data-remove]").forEach(el=>el.onclick=()=>{grainRows.splice(+el.dataset.remove,1);renderGrains();updateGrains()});updateGrains()}
+function updateGrains(){let total=grainRows.reduce((s,g)=>s+(Number(g.kg)||0),0),L=Math.max(.1,num("mashLiters"));$("grainTotal").textContent=total.toFixed(2);$("ratio").textContent=total?(L/total).toFixed(2):"—";let measured=$("phMeasured").value;if(measured!==""){let d=Number(measured)-num("phTarget");$("phDelta").textContent=(d>0?"+":"")+d.toFixed(2);$("phHint").textContent=d>.15?"pH alto":d<-.15?"pH bajo":"En objetivo";$("phHint").className=Math.abs(d)>.15?"bad":"ok"}else{$("phDelta").textContent="—";$("phHint").textContent="Añade medición"}}
+$("addGrain").onclick=()=>addGrain();["mashLiters","phTarget","phMeasured"].forEach(id=>$(id).addEventListener("input",updateGrains));grainDefaults.forEach(addGrain);
+function snapshot(){return {name:$("profileName").value,liters:num("liters"),source:vals("sourceFields"),target:vals("targetFields"),salts:last.x||[],grains:grainRows,updated:new Date().toLocaleString()}}
+function getSaved(){try{return JSON.parse(localStorage.getItem("mitobrew_profiles")||"[]")}catch(e){return []}}
+$("save").onclick=()=>{calculate();let all=getSaved();all.unshift(snapshot());localStorage.setItem("mitobrew_profiles",JSON.stringify(all.slice(0,50)));$("save").textContent="✓ Guardado";setTimeout(()=>$("save").textContent="Guardar perfil",1500)};
+function renderSaved(){let a=getSaved();$("savedList").innerHTML=a.length?a.map((p,i)=>`<div style="padding:12px 0;border-bottom:1px solid var(--line)"><b>${p.name||"Perfil sin nombre"}</b><div class="small">${p.liters} L · ${p.updated||""}</div><div class="actions"><button class="btn secondary" data-load="${i}">Cargar</button><button class="btn warn" data-del="${i}">Eliminar</button></div></div>`).join(""):"Todavía no has guardado perfiles."; $("savedList").querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>{let p=a[+b.dataset.load];$("profileName").value=p.name;$("liters").value=p.liters;ions.forEach(([k])=>{$("sourceFields_"+k).value=p.source[k];$("targetFields_"+k).value=p.target[k]});grainRows=p.grains||[];renderGrains();calculate();document.querySelector('[data-tab="agua"]').click()});$("savedList").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{a.splice(+b.dataset.del,1);localStorage.setItem("mitobrew_profiles",JSON.stringify(a));renderSaved()})}
+$("clearSaved").onclick=()=>{if(confirm("¿Borrar todos los perfiles guardados en este navegador?")){localStorage.removeItem("mitobrew_profiles");renderSaved()}};
+$("export").onclick=()=>{calculate();let text=`MITOBREW · PERFIL DE AGUA\n${last.name}\nVolumen: ${last.L} L\n\nIon\tInicial\tObjetivo\tCalculado\n`+ions.map(([k,n])=>`${n}\t${last.s[k]}\t${last.t[k]}\t${last.base[k].toFixed(2)}`).join("\n")+"\n\nSales:\n"+salts.map((s,i)=>`${s.name}: ${last.x[i].toFixed(2)} g`).join("\n");download("mitobrew-perfil-agua.txt",text,"text/plain")};
+$("downloadBackup").onclick=()=>download("mitobrew-perfiles.json",JSON.stringify(getSaved(),null,2),"application/json");
+function download(name,content,type){let a=document.createElement("a"),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+calculate();
+</script>
+</body></html>
